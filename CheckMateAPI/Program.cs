@@ -13,7 +13,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<TodoDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("TodoDbConnectionString"));
+    // options.UseSqlServer(builder.Configuration.GetConnectionString("TodoDbConnectionString"));
+    options.UseSqlite("Data Source=mydatabase.db");
 });
 var app = builder.Build();
 
