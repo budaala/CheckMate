@@ -1,4 +1,3 @@
-using CheckMateAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using CheckMateAPI.Data;
 
