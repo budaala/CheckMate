@@ -1,7 +1,9 @@
 <template>
-  <HelloWorld />
+    <h1>Hello</h1>
 </template>
 
-<script setup>
-  //
+<script>
+export default {
+    name: 'Home'
+}
 </script>

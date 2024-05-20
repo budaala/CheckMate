@@ -17,20 +17,20 @@
         <v-divider></v-divider>
 
         <v-list density="compact" nav>
-          <v-list-item prepend-icon="mdi-folder" title="My Files" value="myfiles"></v-list-item>
-          <v-list-item prepend-icon="mdi-account-multiple" title="Shared with me" value="shared"></v-list-item>
-          <v-list-item prepend-icon="mdi-star" title="Starred" value="starred"></v-list-item>
+          <v-list-item prepend-icon="mdi-format-list-checks" title="To do" value="myfiles" to="/todo"></v-list-item>
+          <v-list-item prepend-icon="mdi-star" title="About" value="starred" to="/about"></v-list-item>
         </v-list>
       </v-navigation-drawer>
 
     <v-app-bar>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-app-bar-title>Application</v-app-bar-title>
+      <v-app-bar-title>CheckMate</v-app-bar-title>
     </v-app-bar>
 
     <v-main>
       <!--  -->
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
