@@ -8,3 +8,39 @@
 // @use 'vuetify/settings' with (
 //   $color-pack: false
 // );
+
+// @import '@fontsource/montserrat';
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap");
+
+$font-family: "Montserrat";
+// every text element, header and paragraph will have this font
+html, .v-application {
+  [class*="text-"],
+  [class*="headline-"],
+  [class*="subtitle-"],
+  [class*="title-"],
+  [class*="display-"],
+  [class*="overline-"],
+  [class*="caption-"],
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  a,
+  span,
+  div,
+  label,
+  input,
+  textarea,
+  select,
+  option,
+  li, 
+  button {
+    // color: aqua;
+    font-family: $font-family, sans-serif !important;
+  }
+  font-family: $font-family, sans-serif !important;
+}

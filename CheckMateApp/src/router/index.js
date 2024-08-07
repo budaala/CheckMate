@@ -7,7 +7,7 @@
 
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
-import ToDo from '../pages/ToDo.vue'
+import ToDo from '../pages/ToDoPage.vue'
 import index from '../pages/index.vue'
 import about from '../pages/about.vue'
 
