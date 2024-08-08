@@ -152,6 +152,8 @@
   </v-container>
 </template>
 
-<script setup>
-  //
+<script>
+  export default {
+    name: 'HelloWorld',
+  }
 </script>
