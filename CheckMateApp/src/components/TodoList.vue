@@ -1,14 +1,19 @@
 <template>
   <v-card-text>
     <v-list>
-      <v-list-item class="todo-list-item" v-for="todo in list" :key="todo.id">
-        <todo-component
-          :todo="todo"
-          @update:is-completed="
-            $emit('update:is-completed', todo.id, todo.title, todo.isCompleted)
-          "
-        ></todo-component>
-      </v-list-item>
+        <v-list-item class="todo-list-item" v-for="todo in list" :key="todo.id">
+          <todo-component
+            :todo="todo"
+            @update:is-completed="
+              $emit(
+                'update:is-completed',
+                todo.id,
+                { ...todo, isCompleted: $event }
+              )
+            "
+            @update:show-details="$emit('update:show-details', todo)"
+          ></todo-component>
+        </v-list-item>
     </v-list>
   </v-card-text>
 </template>
@@ -33,7 +38,7 @@ export default {
 <style scoped>
 .todo-list-item {
   margin-bottom: 1em;
-  border-bottom: 1px solid #e0e0e0;
+  /* border-bottom: 1px solid #e0e0e0; */
 }
 
 .v-list-item:last-child {

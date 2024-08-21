@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="!errorFetchingData">
     <v-row justify="center">
       <v-col cols="6">
         <v-card>
@@ -43,8 +43,28 @@
               </v-row>
             </v-form>
           </v-card-text>
-          <todoList :list="todos" @update:is-completed="updateTodoCompleted"></todoList>
+          <todoList
+            :list="todos"
+            @update:is-completed="handleTodoUpdate"
+            @update:show-details="toggleTodoDetails"
+          ></todoList>
         </v-card>
+      </v-col>
+      <v-col v-if="clickedTodo">
+        <todoDetails
+          :todo="clickedTodo"
+          @action:edit-todo="handleTodoUpdate"
+          @action:delete-todo="deleteTodo"
+        ></todoDetails>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container v-else>
+    <v-row justify="center">
+      <v-col cols="6">
+        <v-alert type="error"
+          >Error fetching data. Try refreshing the page.</v-alert
+        >
       </v-col>
     </v-row>
   </v-container>
@@ -54,11 +74,13 @@
 import { ref } from "vue";
 import todoList from "@/components/TodoList.vue";
 import TodoService from "@/services/TodoService";
+import todoDetails from "@/components/TodoDetails.vue";
 
 export default {
   name: "ToDoPage",
   components: {
     todoList,
+    todoDetails,
   },
   data: () => ({
     todos: [],
@@ -68,6 +90,8 @@ export default {
     },
     isExpanded: false,
     errorMessages: [],
+    errorFetchingData: false,
+    clickedTodo: null,
   }),
   setup() {
     const newTodoTitle = ref("");
@@ -75,11 +99,17 @@ export default {
     return { newTodoTitle, newTodoSubtitle };
   },
   async mounted() {
-    await this.fetchTodos();
+    try {
+      await this.fetchTodos();
+    } catch (error) {
+      console.error(error);
+      this.errorFetchingData = true;
+    }
   },
   methods: {
     async fetchTodos() {
       this.todos = await TodoService.getAll();
+      this.sortTodos();
     },
     async addTodo() {
       if (!this.newTodoTitle) {
@@ -96,15 +126,37 @@ export default {
       this.newTodoTitle = "";
       this.newTodoSubtitle = "";
     },
+    sortTodos() {
+      this.todos.sort((a, b) => {
+        return a.isCompleted - b.isCompleted;
+      });
+    },
     toggleMoreOptions() {
       this.isExpanded = !this.isExpanded;
     },
-    async updateTodoCompleted(id, title, completed) {
-      const response = await TodoService.updateTodo(id, {
-        title: title,
-        isCompleted: !completed,
-      });
+    toggleTodoDetails(todo) {
+      if (this.clickedTodo && this.clickedTodo.id === todo.id) {
+        this.clickedTodo = null;
+      } else {
+        this.clickedTodo = { ...todo };
+      }
+    },
+    async handleTodoUpdate(id, updatedTodo) {
+      // add completedDate to updatedTodo if isCompleted is true
+      if (updatedTodo.isCompleted) {
+        updatedTodo.completedDate = new Date().toISOString();
+      }
+      await TodoService.updateTodo(id, updatedTodo);
       await this.fetchTodos();
+      if (this.clickedTodo && this.clickedTodo.id === id) {
+        this.clickedTodo = { ...this.clickedTodo, ...updatedTodo };
+      }
+    },
+    async deleteTodo() {
+
+      await TodoService.deleteTodo(this.clickedTodo.id);
+      await this.fetchTodos();
+      this.clickedTodo = null;
     },
   },
 };
@@ -124,7 +176,7 @@ export default {
 }
 
 .v-expansion-panel-title {
-  width: 25%;
+  min-width: 25%;
   margin: 0;
   padding: 0;
   font-size: 1em;

@@ -64,6 +64,14 @@ namespace CheckMateAPI.Controllers
             todoEntity.Title = todo.Title;
             todoEntity.Subtitle = todo.Subtitle;
             todoEntity.IsCompleted = todo.IsCompleted;
+            if (todo.IsCompleted)
+            {
+                todoEntity.CompletedDate = DateTime.Now;
+            }
+            else
+            {
+                todoEntity.CompletedDate = null;
+            }
 
             try
             {
@@ -93,10 +101,16 @@ namespace CheckMateAPI.Controllers
                 return NotFound();
             }
 
-            _todoDbContext.Todos.Remove(todo);
-            await _todoDbContext.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                _todoDbContext.Todos.Remove(todo);
+                await _todoDbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception e)
+            {
+                return NotFound();
+            }
         }
 
         private bool TodoExists(int id)
