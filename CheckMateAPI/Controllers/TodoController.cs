@@ -52,22 +52,23 @@ namespace CheckMateAPI.Controllers
             _todoDbContext.Todos.Add(todo);
             await _todoDbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
+            return Ok();
         }
 
         [HttpPut("/todo/update/{id}")]
         public async Task<IActionResult> UpdateTodo(int id, Todo todo)
         {
-            if (id != todo.Id)
-            {
-                return BadRequest();
-            }
+            todo.Id = id;
+            var todoEntity = _todoDbContext.Todos.Find(todo.Id) ?? throw new Exception("Todo not found");
 
-            _todoDbContext.Entry(todo).State = EntityState.Modified;
+            todoEntity.Title = todo.Title;
+            todoEntity.Subtitle = todo.Subtitle;
+            todoEntity.IsCompleted = todo.IsCompleted;
 
             try
             {
                 await _todoDbContext.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -80,8 +81,6 @@ namespace CheckMateAPI.Controllers
                     throw;
                 }
             }
-
-            return NoContent();
         }
 
         [HttpDelete("/todo/delete/{id}")]

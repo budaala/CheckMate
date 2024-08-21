@@ -43,7 +43,7 @@
               </v-row>
             </v-form>
           </v-card-text>
-          <todo-list :list="todos"></todo-list>
+          <todoList :list="todos" @update:is-completed="updateTodoCompleted"></todoList>
         </v-card>
       </v-col>
     </v-row>
@@ -74,8 +74,8 @@ export default {
     const newTodoSubtitle = ref("");
     return { newTodoTitle, newTodoSubtitle };
   },
-  async created() {
-    this.todos = await TodoService.getAll();
+  async mounted() {
+    await this.fetchTodos();
   },
   methods: {
     async fetchTodos() {
@@ -88,7 +88,7 @@ export default {
       }
       const newTodo = {
         title: this.newTodoTitle,
-        completed: false,
+        isCompleted: false,
         subtitle: this.newTodoSubtitle,
       };
       await TodoService.createNewTodo(newTodo);
@@ -98,6 +98,13 @@ export default {
     },
     toggleMoreOptions() {
       this.isExpanded = !this.isExpanded;
+    },
+    async updateTodoCompleted(id, title, completed) {
+      const response = await TodoService.updateTodo(id, {
+        title: title,
+        isCompleted: !completed,
+      });
+      await this.fetchTodos();
     },
   },
 };

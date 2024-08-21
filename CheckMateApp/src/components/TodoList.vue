@@ -1,10 +1,12 @@
 <template>
   <v-card-text>
     <v-list>
-      <v-list-item id="Todo-list-item" v-for="todo in list" :key="todo.id">
+      <v-list-item class="todo-list-item" v-for="todo in list" :key="todo.id">
         <todo-component
           :todo="todo"
-          @update:completed="updateTodoCompleted"
+          @update:is-completed="
+            $emit('update:is-completed', todo.id, todo.title, todo.isCompleted)
+          "
         ></todo-component>
       </v-list-item>
     </v-list>
@@ -25,20 +27,11 @@ export default {
       required: true,
     },
   },
-  methods: {
-    updateTodoCompleted(id, completed) {
-      const todo = this.list.find((todo) => todo.id === id);
-      if (todo) {
-        todo.completed = completed;
-        console.log(todo.completed);
-      }
-    },
-  },
 };
 </script>
 
 <style scoped>
-#Todo-list-item {
+.todo-list-item {
   margin-bottom: 1em;
   border-bottom: 1px solid #e0e0e0;
 }
