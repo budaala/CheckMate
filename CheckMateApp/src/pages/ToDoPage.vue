@@ -43,15 +43,28 @@
               </v-row>
             </v-form>
           </v-card-text>
-          <todoList :list="todos" @update:is-completed="updateTodoCompleted"></todoList>
+          <todoList
+            :list="todos"
+            @update:is-completed="handleTodoUpdate"
+            @update:show-details="toggleTodoDetails"
+          ></todoList>
         </v-card>
+      </v-col>
+      <v-col v-if="clickedTodo">
+        <todoDetails
+          :todo="clickedTodo"
+          @action:edit-todo="handleTodoUpdate"
+          @action:delete-todo="deleteTodo"
+        ></todoDetails>
       </v-col>
     </v-row>
   </v-container>
   <v-container v-else>
     <v-row justify="center">
       <v-col cols="6">
-        <v-alert type="error">Error fetching data. Try refreshing the page.</v-alert>
+        <v-alert type="error"
+          >Error fetching data. Try refreshing the page.</v-alert
+        >
       </v-col>
     </v-row>
   </v-container>
@@ -61,11 +74,13 @@
 import { ref } from "vue";
 import todoList from "@/components/TodoList.vue";
 import TodoService from "@/services/TodoService";
+import todoDetails from "@/components/TodoDetails.vue";
 
 export default {
   name: "ToDoPage",
   components: {
     todoList,
+    todoDetails,
   },
   data: () => ({
     todos: [],
@@ -76,6 +91,7 @@ export default {
     isExpanded: false,
     errorMessages: [],
     errorFetchingData: false,
+    clickedTodo: null,
   }),
   setup() {
     const newTodoTitle = ref("");
@@ -85,8 +101,7 @@ export default {
   async mounted() {
     try {
       await this.fetchTodos();
-    }
-    catch (error) {
+    } catch (error) {
       console.error(error);
       this.errorFetchingData = true;
     }
@@ -125,6 +140,30 @@ export default {
         isCompleted: !completed,
       });
       await this.fetchTodos();
+    },
+    toggleTodoDetails(todo) {
+      if (this.clickedTodo && this.clickedTodo.id === todo.id) {
+        this.clickedTodo = null;
+      } else {
+        this.clickedTodo = { ...todo };
+      }
+    },
+    async editTodo(id, todo) {
+      await TodoService.updateTodo(id, todo);
+      if (this.clickedTodo && this.clickedTodo.id === id) {
+        Object.assign(this.clickedTodo, todo);
+      }
+      await this.fetchTodos();
+    },
+    async handleTodoUpdate(id, updatedTodo) {
+      await TodoService.updateTodo(id, updatedTodo);
+      await this.fetchTodos();
+      if (this.clickedTodo && this.clickedTodo.id === id) {
+        this.clickedTodo = { ...this.clickedTodo, ...updatedTodo };
+      }
+    },
+    async deleteTodo() {
+      console.log("Delete todo");
     },
   },
 };

@@ -64,6 +64,14 @@ namespace CheckMateAPI.Controllers
             todoEntity.Title = todo.Title;
             todoEntity.Subtitle = todo.Subtitle;
             todoEntity.IsCompleted = todo.IsCompleted;
+            if (todo.IsCompleted)
+            {
+                todoEntity.CompletedDate = DateTime.Now;
+            }
+            else
+            {
+                todoEntity.CompletedDate = null;
+            }
 
             try
             {

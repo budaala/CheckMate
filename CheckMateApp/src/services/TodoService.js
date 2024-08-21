@@ -24,6 +24,22 @@ const getAll = async () => {
   }
 }
 
+const getTodoById = async (id) => {
+  try {
+    const response = await $http.get(`get/${id}`);
+    if (response.status === 200) {
+      return response.data;
+    }
+    else {
+      throw new Error(`Failed to fetch todo: ${response.statusText}`);
+    }
+  }
+  catch (error) {
+    console.error('Error fetching todo:', error);
+    throw error;
+  }
+}
+
 const createNewTodo = async (todo) => {
   try {
     const response = await $http.post('add', todo);
@@ -41,6 +57,7 @@ const createNewTodo = async (todo) => {
 
 const updateTodo = async (id, updatedTodo) => {
   try {
+    console.log('Updating todo: ', id,  updatedTodo);
     const response = await $http.put(`update/${id}`, updatedTodo);
     if (response.status === 200) {
       console.log('Todo updated successfully:', updatedTodo);
@@ -59,5 +76,6 @@ const updateTodo = async (id, updatedTodo) => {
 export default {
   getAll,
   createNewTodo,
-  updateTodo
+  updateTodo,
+  getTodoById,
 };
