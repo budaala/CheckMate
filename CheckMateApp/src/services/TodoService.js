@@ -73,9 +73,27 @@ const updateTodo = async (id, updatedTodo) => {
   }
 }
 
+const deleteTodo = async (id) => {
+  try {
+    const response = await $http.delete(`delete/${id}`);
+    if (response.status === 200) {
+      console.log('Todo deleted successfully:', id);
+      return response.data;
+    }
+    else {
+      throw new Error(`Failed to delete todo: ${response.statusText}`);
+    }
+  }
+  catch (error) {
+    console.error('Error deleting todo:', error);
+    throw error;
+  }
+}
+
 export default {
   getAll,
   createNewTodo,
   updateTodo,
   getTodoById,
+  deleteTodo
 };

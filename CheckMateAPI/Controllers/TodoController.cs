@@ -101,10 +101,16 @@ namespace CheckMateAPI.Controllers
                 return NotFound();
             }
 
-            _todoDbContext.Todos.Remove(todo);
-            await _todoDbContext.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                _todoDbContext.Todos.Remove(todo);
+                await _todoDbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception e)
+            {
+                return NotFound();
+            }
         }
 
         private bool TodoExists(int id)

@@ -134,13 +134,6 @@ export default {
     toggleMoreOptions() {
       this.isExpanded = !this.isExpanded;
     },
-    async updateTodoCompleted(id, title, completed) {
-      await TodoService.updateTodo(id, {
-        title: title,
-        isCompleted: !completed,
-      });
-      await this.fetchTodos();
-    },
     toggleTodoDetails(todo) {
       if (this.clickedTodo && this.clickedTodo.id === todo.id) {
         this.clickedTodo = null;
@@ -148,14 +141,11 @@ export default {
         this.clickedTodo = { ...todo };
       }
     },
-    async editTodo(id, todo) {
-      await TodoService.updateTodo(id, todo);
-      if (this.clickedTodo && this.clickedTodo.id === id) {
-        Object.assign(this.clickedTodo, todo);
-      }
-      await this.fetchTodos();
-    },
     async handleTodoUpdate(id, updatedTodo) {
+      // add completedDate to updatedTodo if isCompleted is true
+      if (updatedTodo.isCompleted) {
+        updatedTodo.completedDate = new Date().toISOString();
+      }
       await TodoService.updateTodo(id, updatedTodo);
       await this.fetchTodos();
       if (this.clickedTodo && this.clickedTodo.id === id) {
@@ -163,7 +153,10 @@ export default {
       }
     },
     async deleteTodo() {
-      console.log("Delete todo");
+
+      await TodoService.deleteTodo(this.clickedTodo.id);
+      await this.fetchTodos();
+      this.clickedTodo = null;
     },
   },
 };
