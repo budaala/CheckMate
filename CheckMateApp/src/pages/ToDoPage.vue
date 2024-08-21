@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="!errorFetchingData">
     <v-row justify="center">
       <v-col cols="6">
         <v-card>
@@ -48,6 +48,13 @@
       </v-col>
     </v-row>
   </v-container>
+  <v-container v-else>
+    <v-row justify="center">
+      <v-col cols="6">
+        <v-alert type="error">Error fetching data. Try refreshing the page.</v-alert>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -68,6 +75,7 @@ export default {
     },
     isExpanded: false,
     errorMessages: [],
+    errorFetchingData: false,
   }),
   setup() {
     const newTodoTitle = ref("");
@@ -75,11 +83,18 @@ export default {
     return { newTodoTitle, newTodoSubtitle };
   },
   async mounted() {
-    await this.fetchTodos();
+    try {
+      await this.fetchTodos();
+    }
+    catch (error) {
+      console.error(error);
+      this.errorFetchingData = true;
+    }
   },
   methods: {
     async fetchTodos() {
       this.todos = await TodoService.getAll();
+      this.sortTodos();
     },
     async addTodo() {
       if (!this.newTodoTitle) {
@@ -96,11 +111,16 @@ export default {
       this.newTodoTitle = "";
       this.newTodoSubtitle = "";
     },
+    sortTodos() {
+      this.todos.sort((a, b) => {
+        return a.isCompleted - b.isCompleted;
+      });
+    },
     toggleMoreOptions() {
       this.isExpanded = !this.isExpanded;
     },
     async updateTodoCompleted(id, title, completed) {
-      const response = await TodoService.updateTodo(id, {
+      await TodoService.updateTodo(id, {
         title: title,
         isCompleted: !completed,
       });
@@ -124,7 +144,7 @@ export default {
 }
 
 .v-expansion-panel-title {
-  width: 25%;
+  min-width: 25%;
   margin: 0;
   padding: 0;
   font-size: 1em;

@@ -26,8 +26,8 @@ const getAll = async () => {
 
 const createNewTodo = async (todo) => {
   try {
-    await $http.post('add', todo);
-    if (response.status === 201) { // (201 Created)
+    const response = await $http.post('add', todo);
+    if (response.status === 200) { 
       return response.data; 
     } else {
       throw new Error(`Failed to create todo: ${response.statusText}`);
