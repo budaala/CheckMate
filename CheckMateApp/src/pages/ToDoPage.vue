@@ -15,13 +15,13 @@
                 <v-expansion-panels>
                   <v-expansion-panel>
                     <v-text-field
-                    clearable
-                    label="Add new todo"
-                    variant="underlined"
-                    v-model="newTodoTitle"
-                    :error-messages="errorMessages"
-                    @input="errorMessages = []"
-                    required
+                      clearable
+                      label="Add new todo"
+                      variant="underlined"
+                      v-model="newTodoTitle"
+                      :error-messages="errorMessages"
+                      @input="errorMessages = []"
+                      required
                     ></v-text-field>
                     <v-expansion-panel-title>
                       More options
@@ -43,7 +43,7 @@
               </v-row>
             </v-form>
           </v-card-text>
-          <todo-list :list="todos"></todo-list>
+          <todoList :list="todos" @update:is-completed="updateTodoCompleted"></todoList>
         </v-card>
       </v-col>
     </v-row>
@@ -53,6 +53,7 @@
 <script>
 import { ref } from "vue";
 import todoList from "@/components/TodoList.vue";
+import TodoService from "@/services/TodoService";
 
 export default {
   name: "ToDoPage",
@@ -60,13 +61,7 @@ export default {
     todoList,
   },
   data: () => ({
-    todos: [
-      { id: 1, title: "Todo 1", completed: false, subtitle: "Subtitle 1" },
-      { id: 2, title: "Todo 2", completed: false, subtitle: "Subtitle 2" },
-      { id: 3, title: "Todo 3", completed: false, subtitle: "Subtitle 3" },
-      { id: 4, title: "Todo 4", completed: false, subtitle: "Subtitle 4" },
-      { id: 5, title: "Todo 5", completed: false, subtitle: "Subtitle 5" },
-    ],
+    todos: [],
     list: {
       title: "My To-Do List",
       description: "This is a list of things I need to do.",
@@ -79,30 +74,43 @@ export default {
     const newTodoSubtitle = ref("");
     return { newTodoTitle, newTodoSubtitle };
   },
+  async mounted() {
+    await this.fetchTodos();
+  },
   methods: {
+    async fetchTodos() {
+      this.todos = await TodoService.getAll();
+    },
     async addTodo() {
       if (!this.newTodoTitle) {
         this.errorMessages = ["Todo title is required"];
         return;
       }
-      this.todos.push({
-        id: this.todos.length + 1,
+      const newTodo = {
         title: this.newTodoTitle,
-        completed: false,
+        isCompleted: false,
         subtitle: this.newTodoSubtitle,
-      });
+      };
+      await TodoService.createNewTodo(newTodo);
+      await this.fetchTodos();
       this.newTodoTitle = "";
       this.newTodoSubtitle = "";
     },
     toggleMoreOptions() {
       this.isExpanded = !this.isExpanded;
     },
+    async updateTodoCompleted(id, title, completed) {
+      const response = await TodoService.updateTodo(id, {
+        title: title,
+        isCompleted: !completed,
+      });
+      await this.fetchTodos();
+    },
   },
 };
 </script>
 
 <style scoped>
-
 #add-Todo-card {
   display: flex;
   flex-direction: row;
@@ -132,6 +140,4 @@ export default {
   padding-top: 0;
   margin: 0;
 }
-
-
 </style>

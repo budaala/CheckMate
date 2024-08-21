@@ -1,78 +1,95 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-
 using CheckMateAPI.Models;
 using CheckMateAPI.Data;
 
 
-namespace CheckMateAPI.Controllers {
+namespace CheckMateAPI.Controllers
+{
     [Route("api/[controller]")]
     [ApiController]
-
-    public class TodoController : ControllerBase {
+    public class TodoController : ControllerBase
+    {
         private readonly TodoDbContext _todoDbContext;
 
-        public TodoController(TodoDbContext context) {
+        public TodoController(TodoDbContext context)
+        {
             _todoDbContext = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetTodos() {
+        [HttpGet("/todo/getAll/")]
+        public async Task<ActionResult> GetTodos()
+        {
             var todos = await _todoDbContext.Todos.ToListAsync();
 
             return Ok(todos);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Todo>> GetTodoById(Guid id) {
+        [HttpGet("/todo/get/{id}")]
+        public async Task<ActionResult<Todo>> GetTodoById(int id)
+        {
             var todo = await _todoDbContext.Todos.FindAsync(id);
 
-            if (todo == null) {
+            if (todo == null)
+            {
                 return NotFound();
             }
 
             return todo;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Todo>> CreateTodo(Todo todo) {
-            todo.Id = Guid.NewGuid();
+        [HttpPost("/todo/add/")]
+        public async Task<ActionResult<Todo>> CreateTodo(Todo todo)
+        {
+            // todo.Id = Guid.NewGuid();
+
+            var maxId = await _todoDbContext.Todos.MaxAsync(t => (int?)t.Id) ?? 0;
+            todo.Id = maxId + 1;
+
             todo.CreatedAt = DateTime.Now;
             todo.IsCompleted = false;
 
             _todoDbContext.Todos.Add(todo);
             await _todoDbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
+            return Ok();
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTodo(Guid id, Todo todo) {
-            if (id != todo.Id) {
-                return BadRequest();
-            }
+        [HttpPut("/todo/update/{id}")]
+        public async Task<IActionResult> UpdateTodo(int id, Todo todo)
+        {
+            todo.Id = id;
+            var todoEntity = _todoDbContext.Todos.Find(todo.Id) ?? throw new Exception("Todo not found");
 
-            _todoDbContext.Entry(todo).State = EntityState.Modified;
+            todoEntity.Title = todo.Title;
+            todoEntity.Subtitle = todo.Subtitle;
+            todoEntity.IsCompleted = todo.IsCompleted;
 
-            try {
+            try
+            {
                 await _todoDbContext.SaveChangesAsync();
-            } catch (DbUpdateConcurrencyException) {
-                if (!TodoExists(id)) {
+                return Ok();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoExists(id))
+                {
                     return NotFound();
-                } else {
+                }
+                else
+                {
                     throw;
                 }
             }
-
-            return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodoById(Guid id) {
+        [HttpDelete("/todo/delete/{id}")]
+        public async Task<IActionResult> DeleteTodoById(int id)
+        {
             var todo = await _todoDbContext.Todos.FindAsync(id);
 
-            if (todo == null) {
+            if (todo == null)
+            {
                 return NotFound();
             }
 
@@ -82,7 +99,8 @@ namespace CheckMateAPI.Controllers {
             return NoContent();
         }
 
-        private bool TodoExists(Guid id) {
+        private bool TodoExists(int id)
+        {
             return _todoDbContext.Todos.Any(e => e.Id == id);
         }
     }

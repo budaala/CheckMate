@@ -10,6 +10,7 @@
   "dependencies": {
     "@fontsource/montserrat": "^5.0.18",
     "@mdi/font": "7.0.96",
+    "axios": "^1.7.3",
     "core-js": "^3.34.0",
     "roboto-fontface": "*",
     "vue": "^3.4.0",
